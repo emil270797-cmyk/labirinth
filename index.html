@@ -11,7 +11,7 @@
             background: #222; 
             margin: 0;
             padding-top: 20px;
-            touch-action: none; /* Запрещаем браузеру масштабировать и скроллить страницу */
+            touch-action: none; 
         }
         canvas { 
             background: #fff; 
@@ -19,10 +19,15 @@
             border-radius: 8px; 
         }
     </style>
+    
+    <!-- ПОДКЛЮЧАЕМ VK BRIDGE -->
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <script src="game.js"></script>
 </body>
 </html>
+
 
