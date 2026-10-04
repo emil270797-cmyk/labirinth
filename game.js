@@ -1,5 +1,10 @@
+// Инициализируем приложение в клиенте ВКонтакте
+vkBridge.send('VKWebAppInit');
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+// ... дальше идет весь твой остальной код ...
 
 const TILE_SIZE = 40;
 
