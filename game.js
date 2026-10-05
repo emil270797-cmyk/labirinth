@@ -44,83 +44,130 @@ const player = {
 let gameState = 'playing'; // 'playing', 'won', 'lost'
 
 function drawMap() {
+    // Настраиваем шрифт для эмодзи
+    ctx.font = '28px Arial'; 
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
     for (let row = 0; row < levelMap.length; row++) {
         for (let col = 0; col < levelMap[row].length; col++) {
             let tile = levelMap[row][col];
             let x = col * TILE_SIZE;
             let y = row * TILE_SIZE;
+            let centerX = x + TILE_SIZE / 2;
+            let centerY = y + TILE_SIZE / 2;
 
-            switch (tile) {
-                case TILE_TYPES.EMPTY: ctx.fillStyle = '#fafad2'; break;
-                case TILE_TYPES.MAASDAM: ctx.fillStyle = '#f1c40f'; break;
-                case TILE_TYPES.PARMESAN: ctx.fillStyle = '#e67e22'; break;
-                case TILE_TYPES.CHEESE_COIN:
-                    ctx.fillStyle = '#fafad2';
-                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    ctx.fillStyle = '#f39c12';
-                    ctx.beginPath();
-                    ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 5, 0, Math.PI * 2);
-                    ctx.fill();
-                    continue;
-                case TILE_TYPES.GOAL:
-                    ctx.fillStyle = '#fafad2';
-                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                    ctx.fillStyle = '#FFD700';
-                    ctx.beginPath();
-                    ctx.arc(x + TILE_SIZE/2, y + TILE_SIZE/2, 15, 0, Math.PI * 2);
-                    ctx.fill();
-                    continue;
-            }
+            // Сначала всегда рисуем красивый светлый пол
+            ctx.fillStyle = '#fdf3e7'; 
             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = '#e1b12c';
+            
+            // Легкая сетка плитки на полу
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+
+            // Отрисовываем объекты поверх пола
+            switch (tile) {
+                case TILE_TYPES.MAASDAM:
+                    ctx.fillText('🧀', centerX, centerY);
+                    break;
+                case TILE_TYPES.PARMESAN:
+                    // Пармезан сделаем в виде кирпичной стены, так как он твердый
+                    ctx.fillText('🧱', centerX, centerY); 
+                    break;
+                case TILE_TYPES.CHEESE_COIN:
+                    // Светящийся эффект под монетой
+                    ctx.fillStyle = 'rgba(241, 196, 15, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillText('⭐', centerX, centerY);
+                    break;
+                case TILE_TYPES.GOAL:
+                    ctx.fillText('🏆', centerX, centerY);
+                    break;
+            }
         }
     }
 }
 
 function drawPlayer() {
-    let px = player.col * TILE_SIZE;
-    let py = player.row * TILE_SIZE;
+    let centerX = player.col * TILE_SIZE + TILE_SIZE / 2;
+    let centerY = player.row * TILE_SIZE + TILE_SIZE / 2;
     
-    ctx.fillStyle = player.color;
+    // Тень под мышью
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
     ctx.beginPath();
-    ctx.arc(px + TILE_SIZE/2, py + TILE_SIZE/2, 12, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY + 8, 10, 0, Math.PI * 2);
     ctx.fill();
+
+    // Сама мышь
+    ctx.font = '30px Arial';
+    ctx.fillText('🐁', centerX, centerY);
 }
 
 function drawUI() {
     let uiY = levelMap.length * TILE_SIZE;
 
-    ctx.fillStyle = '#222';
+    // Темная нижняя панель
+    ctx.fillStyle = '#2c3e50';
     ctx.fillRect(0, uiY, canvas.width, 50);
 
-    ctx.fillStyle = '#fff';
-    ctx.font = '16px Arial';
-    ctx.fillText('Энергия:', 15, uiY + 32);
+    // Текст
+    ctx.fillStyle = '#ecf0f1';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Энергия:', 15, uiY + 31);
 
-    ctx.strokeStyle = '#fff';
-    ctx.strokeRect(90, uiY + 15, 200, 20);
+    // Фон полоски энергии (скругленный)
+    ctx.fillStyle = '#34495e';
+    ctx.beginPath();
+    ctx.roundRect(95, uiY + 15, 200, 20, 10);
+    ctx.fill();
 
+    // Сама энергия с плавным изменением цвета
     let energyWidth = (Math.max(0, player.energy) / player.maxEnergy) * 200;
-    ctx.fillStyle = player.energy > 30 ? '#2ecc71' : '#e74c3c';
-    ctx.fillRect(90, uiY + 15, energyWidth, 20);
+    
+    // Создаем красивый градиент для шкалы
+    let gradient = ctx.createLinearGradient(95, 0, 295, 0);
+    if (player.energy > 40) {
+        gradient.addColorStop(0, '#27ae60'); // Зеленый
+        gradient.addColorStop(1, '#2ecc71');
+    } else {
+        gradient.addColorStop(0, '#c0392b'); // Красный, если мало энергии
+        gradient.addColorStop(1, '#e74c3c');
+    }
 
+    if (energyWidth > 0) {
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(95, uiY + 15, energyWidth, 20, 10);
+        ctx.fill();
+    }
+
+    // Экраны конца игры
     if (gameState !== 'playing') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillStyle = 'rgba(44, 62, 80, 0.85)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        ctx.fillStyle = gameState === 'won' ? '#f1c40f' : '#e74c3c';
-        ctx.font = '30px Arial';
         ctx.textAlign = 'center';
-        let msg = gameState === 'won' ? 'Сыр найден!' : 'Энергия иссякла!';
-        ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#fff';
-        ctx.fillText('Обновите страницу для рестарта', canvas.width / 2, canvas.height / 2 + 40);
+        if (gameState === 'won') {
+            ctx.fillStyle = '#f1c40f';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillText('Победа! 🎉', canvas.width / 2, canvas.height / 2 - 20);
+        } else {
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillText('Сил не осталось 💀', canvas.width / 2, canvas.height / 2 - 20);
+        }
+        
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#bdc3c7';
+        ctx.fillText('Тапните или нажмите F5 для рестарта', canvas.width / 2, canvas.height / 2 + 30);
         ctx.textAlign = 'left';
     }
 }
+
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
