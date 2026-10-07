@@ -1,8 +1,13 @@
 // Инициализируем приложение в клиенте ВКонтакте
+// Инициализируем приложение
 vkBridge.send('VKWebAppInit');
+
+// Отключаем системный жест свайпа "назад" (закрытие приложения)
+vkBridge.send('VKWebAppSetSwipeSettings', { history: false });
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+// ... дальше идет остальной код ...
 
 // ... дальше идет весь твой остальной код ...
 
